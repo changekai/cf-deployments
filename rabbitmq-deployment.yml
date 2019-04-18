@@ -1,0 +1,400 @@
+instance_groups:
+- azs:
+  - z1
+  - z2
+  - z3
+  env: {}
+  instances: 3
+  jobs:
+  - name: rabbitmq_exporter
+    properties:
+      rabbitmq_exporter:
+        exporterst:
+        - connections
+        - exchange
+        - node
+        - overview
+        - queue
+        rabbitmq:
+          password: ((root_password))
+          url: http://127.0.0.1:15672
+          user: admin
+        web:
+          port: 9125
+    release: prometheus
+  - name: sysctl
+    properties:
+      sysctl_conf: |
+        net.core.netdev_max_backlog=4096
+        net.core.somaxconn=32327
+        net.ipv4.ip_local_port_range=32768 60999
+        net.ipv4.tcp_keepalive_intvl=2
+        net.ipv4.tcp_keepalive_probes=2
+        net.ipv4.tcp_keepalive_time=300
+    release: sysctl
+  - consumes: {}
+    name: rabbitmq-server
+    provides: {}
+    release: cf-rabbitmq
+  - consumes: {}
+    name: metron_agent
+    provides: {}
+    release: loggregator
+  - consumes: {}
+    name: service-metrics
+    provides: {}
+    release: service-metrics
+  - consumes: {}
+    name: rabbitmq-server-metrics
+    provides: {}
+    release: rabbitmq-metrics
+  - consumes: {}
+    name: syslog_forwarder
+    provides: {}
+    release: syslog-migration
+  lifecycle: service
+  name: rabbitmq-server
+  networks:
+  - default:
+    - dns
+    - gateway
+    name: rabbitmq-service
+    static_ips:
+    - 10.10.16.100
+    - 10.10.32.100
+    - 10.10.48.100
+  persistent_disk: 65535
+  properties:
+    loggregator:
+      tls:
+        ca_cert: "((loggregator_ca.certificate))"
+        metron:
+          cert: "((loggregator_tls_agent.certificate))"
+          key: "((loggregator_ca.private_key))"
+    metron_agent:
+      deployment: ((environment))-iothub-production
+    rabbitmq-server:
+      administrators:
+        broker:
+          password: ((broker_password))
+          username: broker
+        management:
+          password: ((root_password))
+          username: admin
+      cluster_partition_handling: autoheal
+      config: Wwoge2tlcm5lbCwKICBbCiAgICB7aW5ldF9kaXN0X2xpc3Rlbl9taW4sIDMzNjcyfSwKICAgIHtpbmV0X2Rpc3RfbGlzdGVuX21heCwgMzM2NzJ9CiAgXX0sCiB7cmFiYml0LAogIFsKICAgIHtoYW5kc2hha2VfdGltZW91dCwgMzAwMDB9LAogICAge3NzbF9oYW5kc2hha2VfdGltZW91dCwgMzAwMDB9LAogICAge2NvbGxlY3Rfc3RhdGlzdGljc19pbnRlcnZhbCwxMjAwMDB9LAogICAge3ZtX21lbW9yeV9oaWdoX3dhdGVybWFyaywwLjY2fSwKICAgIHtzc2xfbGlzdGVuZXJzLCBbNTY3MV19LAogICAge3NzbF9vcHRpb25zLCBbe2NhY2VydGZpbGUsIi92YXIvdmNhcC9qb2JzL3JhYmJpdG1xLXNlcnZlci9ldGMvY2FjZXJ0LnBlbSJ9LAogICAgICAgICAgICAgICAgICAge2NlcnRmaWxlLCAgIi92YXIvdmNhcC9qb2JzL3JhYmJpdG1xLXNlcnZlci9ldGMvY2VydC5wZW0ifSwKICAgICAgICAgICAgICAgICAgIHtrZXlmaWxlLCAgICIvdmFyL3ZjYXAvam9icy9yYWJiaXRtcS1zZXJ2ZXIvZXRjL2tleS5wZW0ifQogICAgXX0sCiAgIHt0Y3BfbGlzdGVuX29wdGlvbnMsIFt7YmFja2xvZyw0MDk2fSx7bm9kZWxheSx0cnVlfSx7bGluZ2VyLHt0cnVlLDB9fSx7ZXhpdF9vbl9jbG9zZSwgZmFsc2V9LHtzbmRidWYsMzI3Njh9LHtyZWNidWYsMzI3Njh9LHtrZWVwYWxpdmUsIHRydWV9XX0KICBdfSwKICB7cmFiYml0bXFfbWFuYWdlbWVudCwgICAgICAgCiAgWwogICAge3JhdGVzX21vZGUsYmFzaWN9CiAgXX0sCiAge3JhYmJpdG1xX21xdHQsICAgICAgIAogIFsKICAgIHt0Y3BfbGlzdGVuX29wdGlvbnMsIFt7YmFja2xvZyw0MDk2fSx7bm9kZWxheSx0cnVlfSx7bGluZ2VyLHt0cnVlLDB9fSx7ZXhpdF9vbl9jbG9zZSwgZmFsc2V9LHtzbmRidWYsMzI3Njh9LHtyZWNidWYsMzI3Njh9LHtrZWVwYWxpdmUsIHRydWV9XX0sCiAgICB7c3NsX2xpc3RlbmVycywgICAgWzg4ODNdfQogIF19LAogIAogIHtwcm9tZXRoZXVzLCBbCiAgICB7cmFiYml0bXFfZXhwb3J0ZXIsIFsKICAgICAge2Nvbm5lY3Rpb25zX3RvdGFsX2VuYWJsZWQsIHRydWV9CiAgICBdfQogIF19LAogIAogIHtyYWJiaXRtcV93ZWJfbXF0dCwKICBbCiAgICB7d3NfcGF0aCwgIi93cyJ9CiAgXX0sCiAgCiAge3JhYmJpdG1xX3N0b21wLCAKICBbCgl7dGNwX2xpc3Rlbl9vcHRpb25zLCBbe2JhY2tsb2csNDA5Nn0se25vZGVsYXksdHJ1ZX0se2xpbmdlcix7dHJ1ZSwwfX0se2V4aXRfb25fY2xvc2UsIGZhbHNlfSx7c25kYnVmLDMyNzY4fSx7cmVjYnVmLDMyNzY4fSx7a2VlcGFsaXZlLCB0cnVlfV19LAogICAge3NzbF9saXN0ZW5lcnMsIMKgwqDCoFs2MTYxNF19CiAgXX0KXS4K
+      cookie: null
+      disk_alarm_threshold: '{mem_relative,1.5}'
+      plugins:
+      - rabbitmq_amqp1_0
+      - rabbitmq_auth_backend_ldap
+      - rabbitmq_auth_mechanism_ssl
+      - rabbitmq_consistent_hash_exchange
+      - rabbitmq_federation
+      - rabbitmq_federation_management
+      - rabbitmq_management
+      - rabbitmq_management_visualiser
+      - rabbitmq_mqtt
+      - rabbitmq_web_mqtt
+      - rabbitmq_shovel
+      - rabbitmq_shovel_management
+      - rabbitmq_stomp
+      - rabbitmq_tracing
+      - rabbitmq_web_stomp
+      - rabbitmq_web_stomp_examples
+      - rabbitmq_event_exchange
+      - rabbitmq_jms_topic_exchange
+      - prometheus_rabbitmq_exporter
+      ports: 15672, 5672, 5671, 1883, 8883, 61613, 61614, 15674, 15675
+      ssl:
+        cacert: ((rabbitmq-server.ssl.cacert))
+        cert: ((rabbitmq-server.ssl.cert))
+        enabled: true
+        fail_if_no_peer_cert: false
+        key: ((rabbitmq-server.ssl.key))
+        verification_depth: 5
+        verify: false
+        versions:
+        - tlsv1.1
+        - tlsv1.2
+    service_metrics:
+      execution_interval_seconds: 30
+      metrics_command: /var/vcap/packages/rabbitmq-server-metrics/bin/rabbitmq-server-metrics
+      metrics_command_args:
+      - -erlangBinPath=/var/vcap/packages/erlang/bin/
+      - -rabbitmqCtlPath=/var/vcap/packages/rabbitmq-server/bin/rabbitmqctl
+      - -logPath=/var/vcap/sys/log/service-metrics/rabbitmq-server-metrics.log
+      - -rabbitmqUsername=admin
+      - -rabbitmqPassword=((root_password))
+      - -rabbitmqApiEndpoint=http://127.0.0.1:15672
+      origin: p-rabbitmq
+    syslog:
+      address: null
+      custom_rule: |
+        module(load="imfile")
+
+        input(type="imfile"
+              File="/var/vcap/sys/log/rabbitmq-server/rabbit@*-sasl.log"
+              Tag="rabbitmq_server_sasl")
+
+        input(type="imfile"
+              File="/var/vcap/sys/log/rabbitmq-server/rabbit@*.log"
+              Tag="rabbitmq_server")
+
+        input(type="imfile"
+              File="/var/vcap/sys/log/rabbitmq-server/startup_stderr.log"
+              Tag="rabbitmq_server_startup_stderr")
+
+        input(type="imfile"
+              File="/var/vcap/sys/log/rabbitmq-server/startup_stdout.log"
+              Tag="rabbitmq_server_startup_stdout")
+
+        input(type="imfile"
+              File="/var/vcap/sys/log/rabbitmq-server/shutdown_stdout.log"
+              Tag="rabbitmq_server_shutdown_stdout")
+
+        input(type="imfile"
+              File="/var/vcap/sys/log/rabbitmq-server/shutdown_stderr.log"
+              Tag="rabbitmq_server_shutdown_stderr")
+
+        input(type="imfile"
+              File="/var/vcap/sys/log/rabbitmq-server/management-ui/access.log*"
+              Tag="rabbitmq_server_http_api_access")
+
+        input(type="imfile"
+              File="/var/vcap/sys/log/rabbitmq-server/upgrade.log"
+              Tag="rabbitmq_server_upgrade")
+
+        input(type="imfile"
+              File="/var/vcap/sys/log/rabbitmq-server/init.log"
+              Tag="rabbitmq_server_init")
+
+        input(type="imfile"
+              File="/var/vcap/sys/log/rabbitmq-server/node-check.log"
+              Tag="rabbitmq_server_node_check")
+
+        input(type="imfile"
+              File="/var/vcap/sys/log/rabbitmq-server/cluster-check.log"
+              Tag="rabbitmq_server_cluster_check")
+
+        input(type="imfile"
+              File="/var/vcap/sys/log/rabbitmq-server/post-deploy.stderr.log"
+              Tag="rabbitmq_server_post_deploy_stderr")
+
+        input(type="imfile"
+              File="/var/vcap/sys/log/rabbitmq-server/post-deploy.stdout.log"
+              Tag="rabbitmq_server_post_deploy_stdout")
+
+        input(type="imfile"
+              File="/var/vcap/sys/log/rabbitmq-server/drain.log"
+              Tag="rabbitmq_server_drain")
+
+        input(type="imfile"
+              File="/var/vcap/sys/log/rabbitmq-server/pre-start.log"
+              Tag="rabbitmq_server_pre_start")
+
+        input(type="imfile"
+              File="/var/vcap/sys/log/route_registrar/route_registrar.log"
+              Tag="rabbitmq_route_registrar_stdout")
+
+        input(type="imfile"
+              File="/var/vcap/sys/log/route_registrar/route_registrar.err.log"
+              Tag="rabbitmq_route_registrar_stderr")
+      forward_files: false
+      migration:
+        disabled: true
+        message_format: rfc5424
+      permitted_peer: null
+      port: null
+      tls_enabled: false
+      transport: tcp
+    syslog_daemon_config:
+      enable: false
+  stemcell: default
+  update:
+    max_in_flight: 1
+  vm_extensions:
+  - ((environment))-iothub-production-network-properties
+  vm_type: medium-highmem
+- azs:
+  - z1
+  env: {}
+  instances: 1
+  jobs:
+  - consumes: {}
+    name: rabbitmq-haproxy
+    provides: {}
+    release: cf-rabbitmq
+  - consumes: {}
+    name: metron_agent
+    provides: {}
+    release: loggregator
+  - consumes: {}
+    name: service-metrics
+    provides: {}
+    release: service-metrics
+  - consumes: {}
+    name: rabbitmq-haproxy-metrics
+    provides: {}
+    release: rabbitmq-metrics
+  - consumes:
+      nats:
+        deployment: cf
+        from: nats
+    name: route_registrar
+    provides: {}
+    release: routing
+  - consumes:
+      consul: nil
+      consul_client:
+        deployment: cf
+        from: consul_client_link
+      consul_common:
+        deployment: cf
+        from: consul_common_link
+      consul_server: nil
+    name: consul_agent
+    properties:
+      consul:
+        client:
+          enabled: true
+    provides: {}
+    release: consul
+  lifecycle: service
+  name: rabbitmq-haproxy
+  networks:
+  - default:
+    - dns
+    - gateway
+    name: rabbitmq-service
+    static_ips:
+    - 10.10.16.90
+  - name: vip
+    static_ips:
+    - "((rabbitmq_haproxy_public_ip))"
+  properties:
+    loggregator:
+      tls:
+        ca_cert: "((loggregator_ca.certificate))"
+        metron:
+          cert: "((loggregator_tls_agent.certificate))"
+          key: "((loggregator_ca.private_key))"
+    metron_agent:
+      deployment: ((environment))-iothub-production
+    rabbitmq-haproxy:
+      do-not-configure-syslog: true
+    route_registrar:
+      routes:
+      - name: ((environment))-iothub-production
+        port: 15672
+        registration_interval: 20s
+        uris:
+        - wise-rabbitmq.((domain))
+    service_metrics:
+      execution_interval_seconds: 30
+      metrics_command: /var/vcap/packages/rabbitmq-haproxy-metrics/bin/rabbitmq-haproxy-metrics
+      metrics_command_args:
+      - -haproxyNetwork=unix
+      - -haproxyAddress=/var/vcap/sys/run/rabbitmq-haproxy/haproxy.sock
+      - -logPath=/var/vcap/sys/log/service-metrics/rabbitmq-haproxy-metrics.log
+      origin: p-rabbitmq
+    syslog:
+      address: null
+      ca_cert: null
+      custom_rule: |
+        module(load="imfile")
+
+        input(type="imfile"
+        File="/var/vcap/sys/log/rabbitmq-haproxy/haproxy.log"
+        Tag="rabbitmq_haproxy")
+
+        input(type="imfile"
+        File="/var/vcap/sys/log/rabbitmq-haproxy/pre-start.stderr.log"
+        Tag="rabbitmq_haproxy_pre_start_stderr")
+
+        input(type="imfile"
+        File="/var/vcap/sys/log/rabbitmq-haproxy/pre-start.stdout.log"
+        Tag="rabbitmq_haproxy_pre_start_stdout")
+
+        input(type="imfile"
+        File="/var/vcap/sys/log/rabbitmq-haproxy/startup_stderr.log"
+        Tag="rabbitmq_haproxy_pre_startup_stderr")
+
+        input(type="imfile"
+        File="/var/vcap/sys/log/rabbitmq-haproxy/startup_stdout.log"
+        Tag="rabbitmq_haproxy_pre_startup_stdout")
+
+        input(type="imfile"
+        File="/var/vcap/sys/log/route_registrar/route_registrar.log"
+        Tag="rabbitmq_route_registrar_stdout")
+
+        input(type="imfile"
+        File="/var/vcap/sys/log/route_registrar/route_registrar.err.log"
+        Tag="rabbitmq_route_registrar_stderr")
+      forward_files: false
+      migration:
+        disabled: true
+        insistent_custom_rule: local2.*-/var/vcap/sys/log/rabbitmq-haproxy/haproxy.log
+        message_format: rfc5424
+      permitted_peer: null
+      port: null
+      tls_enabled: false
+      transport: tcp
+  stemcell: default
+  update:
+    max_in_flight: 1
+  vm_type: small
+name: ((environment))-iothub-production
+releases:
+- name: cf-rabbitmq
+  version: 250.0.0+dev.17
+  url: "https://wise-paas.oss-cn-beijing.aliyuncs.com/bosh-release/rabbitmq_release_250_dev17.tgz"
+  sha1: "8a5ac2aeada64b763b9c98c0233f5ec6a43c09a4"
+- name: "service-metrics"
+  version: "1.12.0"
+  url: "https://bosh.io/d/github.com/cloudfoundry/service-metrics-release?v=1.12.0"
+  sha1: "6e259513f62ef163ece0eb19b9348c70573400f1"
+- name: "loggregator"
+  version: "101.5"
+  url: "https://bosh.io/d/github.com/cloudfoundry/loggregator-release?v=101.5"
+  sha1: "7c5f63c91aa6a4fef0c28e6dae2e15bd9ae52575"
+- name: rabbitmq-metrics
+  version: 9.8.0
+  url: "https://wise-paas.oss-cn-beijing.aliyuncs.com/bosh-release/rabbitmq-metrics-9.8.0.tgz"
+  sha1: "a00ec5e06a439b35d16f4670e77dde5bbe0060b3"
+- name: "cf-routing"
+  version: "0.171.0"
+  url: "https://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=0.171.0"
+  sha1: "137f568a99949ce97b8f45f7736ad9c6f57f5ecf"
+- name: "prometheus"
+  version: "22.0.0"
+  url: "https://bosh.io/d/github.com/cloudfoundry-community/prometheus-boshrelease?v=22.0.0"
+  sha1: "c6c9dd3530ccf94eefc70b11482e77eafc20a0ef"
+- name: sysctl
+  version: "2"
+  url: "https://github.com/cloudfoundry-community/sysctl-release/releases/download/v2/release.tgz"
+  sha1: "09ae3d2271630653cceec115282004bfef1c694b"
+- name: syslog-migration
+  version: 11.1.1
+  url: "https://github.com/pivotal-cf/syslog-migration-release/releases/download/v11.1.1/syslog-migration-11.1.1.tgz"
+  sha1: "559720706463798be7120e8f1ebbaa48a7d03075"
+- name: "consul"
+  version: "191"
+  url: "https://bosh.io/d/github.com/cloudfoundry-incubator/consul-release?v=191"
+  sha1: "61b429ae13e0fde0ebdb98fce99e08f7baf60a16"
+stemcells:
+- alias: default
+  os: ubuntu-trusty
+  version: "3468.51"
+update:
+  canaries: 1
+  canary_watch_time: 30000-300000
+  max_errors: 2
+  max_in_flight: 1
+  serial: true
+  update_watch_time: 30000-300000
+variables:
+- name: root_password
+  type: password
+- name: broker_password
+  type: password
