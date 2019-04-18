@@ -1,0 +1,54 @@
+loggregator_ca:
+  ca: |
+    -----BEGIN CERTIFICATE-----
+    MIIE...
+    -----END CERTIFICATE-----
+  certificate: |
+    -----BEGIN CERTIFICATE-----
+    MIIE...
+    -----END CERTIFICATE-----
+  private_key: |
+    -----BEGIN RSA PRIVATE KEY-----
+    MIIG...
+    -----END RSA PRIVATE KEY-----
+loggregator_tls_metron:
+  ca: |
+    -----BEGIN CERTIFICATE-----
+    MIIE...
+    -----END CERTIFICATE-----
+  certificate: |
+    -----BEGIN CERTIFICATE-----
+    MIIE...
+    -----END CERTIFICATE-----
+  private_key: |
+    -----BEGIN RSA PRIVATE KEY-----
+    MIIG...
+    -----END RSA PRIVATE KEY-----
+rabbitmq-server:
+  certificate: |
+    -----BEGIN CERTIFICATE-----
+    MIIE...
+    -----END CERTIFICATE-----
+  private_key: |
+    -----BEGIN RSA PRIVATE KEY-----
+    MIIG...
+    -----END RSA PRIVATE KEY-----
+  ca: |
+    -----BEGIN CERTIFICATE-----
+    MIIE...
+    -----END CERTIFICATE-----
+service_cf_internal_ca:
+  ca: |
+    -----BEGIN CERTIFICATE-----
+    MIIE...
+    -----END CERTIFICATE-----
+  certificate: |
+    -----BEGIN CERTIFICATE-----
+    MIIE...
+    -----END CERTIFICATE-----
+  private_key: |
+    -----BEGIN RSA PRIVATE KEY-----
+    MIIG...
+    -----END RSA PRIVATE KEY-----
+broker_password: this_is_broker_password
+root_password: this_is_root_password
