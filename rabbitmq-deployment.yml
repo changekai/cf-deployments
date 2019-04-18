@@ -289,7 +289,7 @@ instance_groups:
         port: 15672
         registration_interval: 20s
         uris:
-        - wise-rabbitmq.((domain))
+        - ((environment))-rabbitmq.((domain))
     service_metrics:
       execution_interval_seconds: 30
       metrics_command: /var/vcap/packages/rabbitmq-haproxy-metrics/bin/rabbitmq-haproxy-metrics
