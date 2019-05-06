@@ -1,3 +1,13 @@
+addons:
+- name: bpm
+  include:
+    stemcell:
+    - os: ubuntu-xenial
+    - os: ubuntu-trusty
+  jobs:
+  - name: bpm
+    release: bpm
+
 instance_groups:
 - azs:
   - z1
@@ -16,7 +26,7 @@ instance_groups:
         - overview
         - queue
         rabbitmq:
-          password: ((root_password))
+          password: "((root_password))"
           url: http://127.0.0.1:15672
           user: admin
         web:
@@ -59,27 +69,24 @@ instance_groups:
     - dns
     - gateway
     name: rabbitmq-service
-    static_ips:
-    - 10.10.16.100
-    - 10.10.32.100
-    - 10.10.48.100
+    static_ips: "((rabbitmq_server_private_ips))"
   persistent_disk: 65535
   properties:
     loggregator:
       tls:
         ca_cert: "((loggregator_ca.certificate))"
         metron:
-          cert: "((loggregator_tls_metron.certificate))"
-          key: "((loggregator_tls_metron.private_key))"
+          cert: "((loggregator_tls_agent.certificate))"
+          key: "((loggregator_tls_agent.private_key))"
     metron_agent:
       deployment: ((environment))-iothub-production
     rabbitmq-server:
       administrators:
         broker:
-          password: ((broker_password))
+          password: "((broker_password))"
           username: broker
         management:
-          password: ((root_password))
+          password: "((root_password))"
           username: admin
       cluster_partition_handling: autoheal
       config: Wwoge2tlcm5lbCwKICBbCiAgICB7aW5ldF9kaXN0X2xpc3Rlbl9taW4sIDMzNjcyfSwKICAgIHtpbmV0X2Rpc3RfbGlzdGVuX21heCwgMzM2NzJ9CiAgXX0sCiB7cmFiYml0LAogIFsKICAgIHtoYW5kc2hha2VfdGltZW91dCwgMzAwMDB9LAogICAge3NzbF9oYW5kc2hha2VfdGltZW91dCwgMzAwMDB9LAogICAge2NvbGxlY3Rfc3RhdGlzdGljc19pbnRlcnZhbCwxMjAwMDB9LAogICAge3ZtX21lbW9yeV9oaWdoX3dhdGVybWFyaywwLjY2fSwKICAgIHtzc2xfbGlzdGVuZXJzLCBbNTY3MV19LAogICAge3NzbF9vcHRpb25zLCBbe2NhY2VydGZpbGUsIi92YXIvdmNhcC9qb2JzL3JhYmJpdG1xLXNlcnZlci9ldGMvY2FjZXJ0LnBlbSJ9LAogICAgICAgICAgICAgICAgICAge2NlcnRmaWxlLCAgIi92YXIvdmNhcC9qb2JzL3JhYmJpdG1xLXNlcnZlci9ldGMvY2VydC5wZW0ifSwKICAgICAgICAgICAgICAgICAgIHtrZXlmaWxlLCAgICIvdmFyL3ZjYXAvam9icy9yYWJiaXRtcS1zZXJ2ZXIvZXRjL2tleS5wZW0ifQogICAgXX0sCiAgIHt0Y3BfbGlzdGVuX29wdGlvbnMsIFt7YmFja2xvZyw0MDk2fSx7bm9kZWxheSx0cnVlfSx7bGluZ2VyLHt0cnVlLDB9fSx7ZXhpdF9vbl9jbG9zZSwgZmFsc2V9LHtzbmRidWYsMzI3Njh9LHtyZWNidWYsMzI3Njh9LHtrZWVwYWxpdmUsIHRydWV9XX0KICBdfSwKICB7cmFiYml0bXFfbWFuYWdlbWVudCwgICAgICAgCiAgWwogICAge3JhdGVzX21vZGUsYmFzaWN9CiAgXX0sCiAge3JhYmJpdG1xX21xdHQsICAgICAgIAogIFsKICAgIHt0Y3BfbGlzdGVuX29wdGlvbnMsIFt7YmFja2xvZyw0MDk2fSx7bm9kZWxheSx0cnVlfSx7bGluZ2VyLHt0cnVlLDB9fSx7ZXhpdF9vbl9jbG9zZSwgZmFsc2V9LHtzbmRidWYsMzI3Njh9LHtyZWNidWYsMzI3Njh9LHtrZWVwYWxpdmUsIHRydWV9XX0sCiAgICB7c3NsX2xpc3RlbmVycywgICAgWzg4ODNdfQogIF19LAogIAogIHtwcm9tZXRoZXVzLCBbCiAgICB7cmFiYml0bXFfZXhwb3J0ZXIsIFsKICAgICAge2Nvbm5lY3Rpb25zX3RvdGFsX2VuYWJsZWQsIHRydWV9CiAgICBdfQogIF19LAogIAogIHtyYWJiaXRtcV93ZWJfbXF0dCwKICBbCiAgICB7d3NfcGF0aCwgIi93cyJ9CiAgXX0sCiAgCiAge3JhYmJpdG1xX3N0b21wLCAKICBbCgl7dGNwX2xpc3Rlbl9vcHRpb25zLCBbe2JhY2tsb2csNDA5Nn0se25vZGVsYXksdHJ1ZX0se2xpbmdlcix7dHJ1ZSwwfX0se2V4aXRfb25fY2xvc2UsIGZhbHNlfSx7c25kYnVmLDMyNzY4fSx7cmVjYnVmLDMyNzY4fSx7a2VlcGFsaXZlLCB0cnVlfV19LAogICAge3NzbF9saXN0ZW5lcnMsIMKgwqDCoFs2MTYxNF19CiAgXX0KXS4K
@@ -107,11 +114,11 @@ instance_groups:
       - prometheus_rabbitmq_exporter
       ports: 15672, 5672, 5671, 1883, 8883, 61613, 61614, 15674, 15675
       ssl:
-        cacert: ((haproxy_ca.certificate))
-        cert: ((haproxy_ssl.certificate))
+        cacert: "((haproxy_ca.certificate))"
+        cert: "((haproxy_ssl.certificate))"
         enabled: true
         fail_if_no_peer_cert: false
-        key: ((haproxy_ssl.private_key))
+        key: "((haproxy_ssl.private_key))"
         verification_depth: 5
         verify: false
         versions:
@@ -128,6 +135,12 @@ instance_groups:
       - -rabbitmqPassword=((root_password))
       - -rabbitmqApiEndpoint=http://127.0.0.1:15672
       origin: p-rabbitmq
+      tls:
+        ca: ((service_metrics_ssl.ca))
+        cert: ((service_metrics_ssl.certificate))
+        key: ((service_metrics_ssl.private_key))
+      bpm:
+        enabled: true
     syslog:
       address: null
       custom_rule: |
@@ -213,8 +226,8 @@ instance_groups:
   stemcell: default
   update:
     max_in_flight: 1
-  vm_extensions:
-  - ((environment))-iothub-production-network-properties
+  #vm_extensions:
+  #- ((environment))-iothub-production-network-properties
   vm_type: medium-highmem
 - azs:
   - z1
@@ -229,10 +242,10 @@ instance_groups:
     name: metron_agent
     provides: {}
     release: loggregator
-  - consumes: {}
-    name: service-metrics
-    provides: {}
-    release: service-metrics
+  #- consumes: {}
+  #  name: service-metrics
+  #  provides: {}
+  #  release: service-metrics
   - consumes: {}
     name: rabbitmq-haproxy-metrics
     provides: {}
@@ -244,22 +257,22 @@ instance_groups:
     name: route_registrar
     provides: {}
     release: routing
-  - consumes:
-      consul: nil
-      consul_client:
-        deployment: cf
-        from: consul_client_link
-      consul_common:
-        deployment: cf
-        from: consul_common_link
-      consul_server: nil
-    name: consul_agent
-    properties:
-      consul:
-        client:
-          enabled: true
-    provides: {}
-    release: consul
+  #- consumes:
+  #    consul: nil
+  #    consul_client:
+  #      deployment: cf
+  #      from: consul_client_link
+  #    consul_common:
+  #      deployment: cf
+  #      from: consul_common_link
+  #    consul_server: nil
+  #  name: consul_agent
+  #  properties:
+  #    consul:
+  #      client:
+  #        enabled: true
+  #  provides: {}
+  #  release: consul
   lifecycle: service
   name: rabbitmq-haproxy
   networks:
@@ -268,7 +281,7 @@ instance_groups:
     - gateway
     name: rabbitmq-service
     static_ips:
-    - 10.10.16.90
+    - "((rabbitmq_haproxy_private_ip))"
   - name: vip
     static_ips:
     - "((rabbitmq_haproxy_public_ip))"
@@ -277,8 +290,8 @@ instance_groups:
       tls:
         ca_cert: "((loggregator_ca.certificate))"
         metron:
-          cert: "((loggregator_tls_metron.certificate))"
-          key: "((loggregator_tls_metron.private_key))"
+          cert: "((loggregator_tls_agent.certificate))"
+          key: "((loggregator_tls_agent.private_key))"
     metron_agent:
       deployment: ((environment))-iothub-production
     rabbitmq-haproxy:
@@ -290,14 +303,20 @@ instance_groups:
         registration_interval: 20s
         uris:
         - ((environment))-rabbitmq.((domain))
-    service_metrics:
-      execution_interval_seconds: 30
-      metrics_command: /var/vcap/packages/rabbitmq-haproxy-metrics/bin/rabbitmq-haproxy-metrics
-      metrics_command_args:
-      - -haproxyNetwork=unix
-      - -haproxyAddress=/var/vcap/sys/run/rabbitmq-haproxy/haproxy.sock
-      - -logPath=/var/vcap/sys/log/service-metrics/rabbitmq-haproxy-metrics.log
-      origin: p-rabbitmq
+    #service_metrics:
+    #  execution_interval_seconds: 30
+    #  metrics_command: /var/vcap/packages/rabbitmq-haproxy-metrics/bin/rabbitmq-haproxy-metrics
+    #  metrics_command_args:
+    #  - -haproxyNetwork=unix
+    #  - -haproxyAddress=/var/vcap/sys/run/rabbitmq-haproxy/haproxy.sock
+    #  - -logPath=/var/vcap/sys/log/service-metrics/rabbitmq-haproxy-metrics.log
+    #  origin: p-rabbitmq
+    #  tls:
+    #    ca: ((service_metrics_ssl.ca))
+    #    cert: ((service_metrics_ssl.certificate))
+    #    key: ((service_metrics_ssl.private_key))
+    #  bpm:
+    #    enabled: true
     syslog:
       address: null
       ca_cert: null
@@ -362,7 +381,7 @@ releases:
   version: 9.8.0
   url: "https://wise-paas.oss-cn-beijing.aliyuncs.com/bosh-release/rabbitmq-metrics-9.8.0.tgz"
   sha1: "a00ec5e06a439b35d16f4670e77dde5bbe0060b3"
-- name: "cf-routing"
+- name: "routing"
   version: "0.171.0"
   url: "https://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=0.171.0"
   sha1: "137f568a99949ce97b8f45f7736ad9c6f57f5ecf"
@@ -382,6 +401,10 @@ releases:
   version: "191"
   url: "https://bosh.io/d/github.com/cloudfoundry-incubator/consul-release?v=191"
   sha1: "61b429ae13e0fde0ebdb98fce99e08f7baf60a16"
+- name: bpm
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/bpm-release?v=1.0.4
+  version: 1.0.4
+  sha1: 41df19697d6a69d2552bc2c132928157fa91abe0
 stemcells:
 - alias: default
   os: ubuntu-trusty
@@ -393,8 +416,18 @@ update:
   max_in_flight: 1
   serial: true
   update_watch_time: 30000-300000
-variables:  
+variables:
 - name: root_password
   type: password
 - name: broker_password
   type: password
+- name: service_metrics_ca
+  type: certificate
+  options:
+    is_ca: true
+    common_name: service_metricsCA
+- name: service_metrics_ssl
+  type: certificate
+  options:
+    ca: service_metrics_ca
+    common_name: service_metrics_certificate
